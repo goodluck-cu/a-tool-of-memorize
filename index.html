@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-T-O-M</title>
+</head>
+<script type="module">
+    import { fetch_quests, install_main } from "./app.js";
+    window.addEventListener('load',
+        async () => {
+            await install_main(document.getElementById("quest_main"), './coded_practice.txt');
+        });
+</script>
+
+<style>
+    #quest_main {
+        background-color: aliceblue;
+    }
+
+    #quest_main ul li {
+        border-width: 1px;
+        border-style: solid;
+        border-color: transparent;
+    }
+
+    #quest_main ul li.selected {
+        border-color: greenyellow;
+    }
+
+    #quest_main ul li.right {
+        border-color: tomato;
+    }
+
+    #quest_main ul li.right.selected {
+        border-color: greenyellow;
+        background-color: greenyellow;
+    }
+
+    #quest_main ul li.wrong.selected {
+        background-color: tomato;
+    }
+
+    #submit {
+        display: inline-block;
+    }
+</style>
+
+<body>
+    <div id="quest_main"></div>
+</body>
+
+</html>
