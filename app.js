@@ -15,8 +15,10 @@ async function install_main(div, quest_url) {
     div.innerHTML = `
         <div id="quest"></div>
         <div id="sels"></div>
-        <div id="submit">提交</div>
-        <div id="next">下一题</div>
+        <div class="touch_area">
+            <div class="button" id="submit">提交</div>
+            <div class="button" id="next">下一题</div>
+        </div>
     `;
 
     div.querySelector('#next').addEventListener('click', () => {

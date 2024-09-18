@@ -17,12 +17,23 @@
 <style>
     #quest_main {
         background-color: aliceblue;
+        height: 100vh;
+        width: 100vw;
+        margin: 20px;
+    }
+
+    ul {
+        padding-inline-start: 0;
     }
 
     #quest_main ul li {
+        padding-top: 5px;
+        padding-bottom: 5px;
         border-width: 1px;
         border-style: solid;
         border-color: transparent;
+        font-size: 0.5cm;
+        list-style-type: none;
     }
 
     #quest_main ul li.selected {
@@ -42,8 +53,28 @@
         background-color: tomato;
     }
 
+    #quest {
+        max-width: 400px;
+        font-size: 0.5cm;
+    }
+
     #submit {
         display: inline-block;
+    }
+
+    .button {
+        background-color: gainsboro;
+        border-style: solid;
+        display: inline-block;
+        width: 4cm;
+        height: 1.5cm;
+        text-align: center;
+        font-size: 1cm;
+    }
+
+    .touch_area {
+        position: absolute;
+        bottom: 0px;
     }
 </style>
 
