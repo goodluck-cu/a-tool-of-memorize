@@ -6,6 +6,8 @@ const _db = new Promise((resolve, reject) => {
     db.onupgradeneeded = function (event) {
         let db = event.target.result;
         db.createObjectStore("CachedFile", { keyPath: "url" });
+        db.createObjectStore("Save", { keyPath: "url" });
+        db.createObjectStore("AnswerHistory", { autoIncrement: true });
     };
 });
 
@@ -46,6 +48,52 @@ function store_cached_file(db, url, last_modified, content) {
     });
 }
 
+function fetch_save_data(db, key) {
+    return new Promise((resolve, reject) => {
+        let transaction = db.transaction(['Save']);
+        let objectStore = transaction.objectStore('Save');
+        let request = objectStore.get(key);
+        request.onerror = function (event) {
+            reject(event);
+        };
+        request.onsuccess = (_) => {
+            if (request.result) {
+                resolve(request.result);
+            } else {
+                resolve(null);
+            }
+        };
+    });
+}
+
+function store_save_data(db, obj) {
+    return new Promise((resolve, reject) => {
+        let transaction = db.transaction(['Save'], 'readwrite');
+        let objectStore = transaction.objectStore('Save');
+        let request = objectStore.put(obj);
+        request.onerror = function (event) {
+            reject(event);
+        };
+        request.onsuccess = (_) => {
+            resolve();
+        };
+    });
+}
+
+function append_history(db, obj) {
+    return new Promise((resolve, reject) => {
+        let transaction = db.transaction(['AnswerHistory'], 'readwrite');
+        let objectStore = transaction.objectStore('AnswerHistory');
+        let request = objectStore.put(obj);
+        request.onerror = function (event) {
+            reject(event);
+        };
+        request.onsuccess = (_) => {
+            resolve();
+        };
+    });
+}
+
 async function fetch_quests(url) {
     url = String(new URL(url, window.location.href));
     let db = await _db;
@@ -73,12 +121,14 @@ async function fetch_quests(url) {
     } catch (e) {
         const jsonString = decodeURIComponent(encodeURIComponent(atob(text)));
         res = JSON.parse(jsonString);
+        console.log(res.length);
     };
-    return res;
+    return { url, quests: res };
 }
 
 async function install_main(div, quest_url) {
-    let quests = await fetch_quests(quest_url);
+    let { url, quests } = await fetch_quests(quest_url);
+    div.dataset.url = url;
     div.innerHTML = `
         <div id="quest"></div>
         <div id="sels"></div>
@@ -87,18 +137,39 @@ async function install_main(div, quest_url) {
             <div class="button" id="next">下一题</div>
         </div>
     `;
+    var save = await fetch_save_data(await _db, url);
+    if (!save) {
+        save = { url, current: 0 };
+        await store_save_data(await _db, save);
+    }
+    let id = save.current;
+    div.dataset.current_id = toString(id);
 
-    div.querySelector('#next').addEventListener('click', () => {
-        update_quest(div, rand_one(quests));
+    div.querySelector('#next').addEventListener('click', async () => {
+        let id = parseInt(div.dataset.current_id) + 1;
+        update_quest(div, { id, quest: quests[id] });
+        save.current = id;
+        await store_save_data(await _db, save);
     });
-    div.querySelector('#submit').addEventListener('click', () => {
-        check_answer(div);
+    div.querySelector('#submit').addEventListener('click', async () => {
+        await check_answer(div);
     });
 
-    update_quest(div, rand_one(quests));
+    update_quest(div, { id, quest: quests[id] });
 }
 
-function check_answer(div) {
+async function check_answer(div) {
+    let id = parseInt(div.dataset.current_id);
+    let selected = [];
+    for (let item of div.querySelectorAll('li.selected')) {
+        let value = JSON.parse(item.dataset.value);
+        selected.push(value);
+    }
+    if (selected.length === 0) {
+        alert("别不选啊");
+        return;
+    }
+
     let quest = JSON.parse(div.dataset.current_quest);
     for (let item of div.querySelectorAll('li')) {
         let value = JSON.parse(item.dataset.value);
@@ -108,15 +179,33 @@ function check_answer(div) {
             item.classList.add('wrong');
         }
     }
+
+    let qanswer = quest.answer;
+    if (!Array.isArray(qanswer)) {
+        qanswer = [qanswer];
+    }
+    const right = qanswer.length === selected.length && qanswer.every((value, index) => value === selected[index]);
+    let check = {
+        quest_id: id,
+        url: div.dataset.url,
+        date: new Date(),
+        selected,
+        right,
+    };
+    append_history(await _db, check);
+    console.log(check);
 }
 
-function update_quest(div, quest) {
+function update_quest(div, { id, quest }) {
+    div.dataset.current_id = id;
+    console.log(id, quest);
     let quest_div = div.querySelector('#quest');
     let sels_div = div.querySelector('#sels');
     quest_div.replaceChildren();
     sels_div.replaceChildren();
 
     div.dataset.current_quest = JSON.stringify(quest);
+    let quest_text = id + '. ' + quest.quest;
 
 
     let ul = document.createElement('ul')
@@ -141,9 +230,9 @@ function update_quest(div, quest) {
     }
     if (quest.type === 'select') {
         if (single_answer) {
-            quest_div.innerText = quest.quest + ' (单选)';
+            quest_div.innerText = quest_text + ' (单选)';
         } else {
-            quest_div.innerText = quest.quest + ' (多选)';
+            quest_div.innerText = quest_text + ' (多选)';
         }
         for (const k in quest.sels) {
             const v = quest.sels[k];
@@ -154,7 +243,7 @@ function update_quest(div, quest) {
             one.dataset.value = JSON.stringify(k);
         }
     } else if (quest.type == 'judge') {
-        quest_div.innerText = quest.quest + ' (判断)'
+        quest_div.innerText = quest_text + ' (判断)'
         let ok = document.createElement('li');
         ok.innerText = "对"
         let no = document.createElement('li');
@@ -166,7 +255,7 @@ function update_quest(div, quest) {
         ok.dataset.value = JSON.stringify(true);
         no.dataset.value = JSON.stringify(false);
     } else if (quest.type == 'unknown') {
-        quest_div.innerText = quest.quest + ' (不知道答案)'
+        quest_div.innerText = quest_text + ' (不知道答案)'
     }
 }
 
