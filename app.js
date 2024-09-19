@@ -1,10 +1,77 @@
+const _db = new Promise((resolve, reject) => {
+    let db = indexedDB.open('save');
+    db.onsuccess = (ev) => {
+        resolve(ev.target.result);
+    };
+    db.onupgradeneeded = function (event) {
+        let db = event.target.result;
+        db.createObjectStore("CachedFile", { keyPath: "url" });
+    };
+});
+
+function fetch_cached_file(db, url) {
+    return new Promise((resolve, reject) => {
+        let transaction = db.transaction(['CachedFile']);
+        let objectStore = transaction.objectStore('CachedFile');
+        let request = objectStore.get(url);
+        request.onerror = function (event) {
+            reject(event);
+        };
+        request.onsuccess = (_) => {
+            console.log('found cache for ', url);
+            if (request.result) {
+                resolve(request.result);
+            } else {
+                resolve(null);
+            }
+        };
+    });
+}
+
+function store_cached_file(db, url, last_modified, content) {
+    return new Promise((resolve, reject) => {
+        let transaction = db.transaction(['CachedFile'], 'readwrite');
+        let objectStore = transaction.objectStore('CachedFile');
+        let request = objectStore.put({
+            url,
+            last_modified,
+            content,
+        });
+        request.onerror = function (event) {
+            reject(event);
+        };
+        request.onsuccess = (_) => {
+            resolve();
+        };
+    });
+}
+
 async function fetch_quests(url) {
+    url = String(new URL(url, window.location.href));
+    let db = await _db;
+    let cached_f = await fetch_cached_file(db, url);
     let res = await fetch(url);
-    let text = await res.text();
+    let last_modified = res.headers.get("Last-Modified");
+    let date = new Date(last_modified);
+    let text;
+    if (cached_f) {
+        if (cached_f.last_modified < date) {
+            text = await res.text();
+            console.log("update cache url", url);
+            await store_cached_file(db, url, date, text);
+        } else {
+            console.log("use cache url", url);
+            text = cached_f.content;
+        }
+    } else {
+        text = await res.text();
+        console.log("update cache url", url);
+        await store_cached_file(db, url, date, text);
+    }
     try {
         res = JSON.parse(text);
     } catch (e) {
-        const jsonString = decodeURIComponent(escape(atob(text)));
+        const jsonString = decodeURIComponent(encodeURIComponent(atob(text)));
         res = JSON.parse(jsonString);
     };
     return res;
