@@ -17,15 +17,18 @@
 <style>
     body {
         margin: 0px;
+        height: 100vh;
     }
 
     #quest_main {
         background-color: aliceblue;
         padding: 20px;
-        position: absolute;
+        position: relative;
         width: 100%;
-        height: 100%;
         box-sizing: border-box;
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
     }
 
     ul {
@@ -62,6 +65,11 @@
     #quest {
         max-width: 400px;
         font-size: 0.5cm;
+        margin-bottom: auto;
+    }
+
+    #sels {
+        margin-bottom: auto;
     }
 
     #submit {
@@ -79,7 +87,6 @@
     }
 
     .touch_area {
-        position: absolute;
         bottom: 20px;
     }
 </style>
