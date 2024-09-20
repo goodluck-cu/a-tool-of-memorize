@@ -133,6 +133,7 @@ async function install_main(div, quest_url) {
         <div id="quest"></div>
         <div id="sels"></div>
         <div class="touch_area">
+            <div class="button" id="prev">上一题</div>
             <div class="button" id="submit">提交</div>
             <div class="button" id="next">下一题</div>
         </div>
@@ -147,6 +148,12 @@ async function install_main(div, quest_url) {
 
     div.querySelector('#next').addEventListener('click', async () => {
         let id = parseInt(div.dataset.current_id) + 1;
+        update_quest(div, { id, quest: quests[id] });
+        save.current = id;
+        await store_save_data(await _db, save);
+    });
+    div.querySelector('#prev').addEventListener('click', async () => {
+        let id = parseInt(div.dataset.current_id) - 1;
         update_quest(div, { id, quest: quests[id] });
         save.current = id;
         await store_save_data(await _db, save);
