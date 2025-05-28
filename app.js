@@ -119,7 +119,8 @@ async function fetch_quests(url) {
     try {
         res = JSON.parse(text);
     } catch (e) {
-        const jsonString = decodeURIComponent(encodeURIComponent(atob(text)));
+        const jsonString = new TextDecoder('utf-8').decode(Uint8Array.from(atob(text), c => c.charCodeAt(0)));
+
         res = JSON.parse(jsonString);
         console.log(res.length);
     };
