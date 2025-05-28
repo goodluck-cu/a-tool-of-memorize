@@ -10,7 +10,9 @@
     import { fetch_quests, install_main } from "./app.js";
     window.addEventListener('load',
         async () => {
-            await install_main(document.getElementById("quest_main"), './coded_practice_1840.txt');
+            const urlParams = new URLSearchParams(window.location.search);
+            const practiceParam = urlParams.get('practice');
+            await install_main(document.getElementById("quest_main"), `./${practiceParam}.txt`);
         });
 </script>
 
@@ -88,7 +90,6 @@
     .touch_area {
         bottom: 20px;
     }
-    
 </style>
 
 <body>
