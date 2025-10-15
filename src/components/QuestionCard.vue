@@ -18,8 +18,8 @@
           v-for="(option, key) in getOptions()"
           :key="key"
           class="option-item"
-          :class="getOptionClasses(key)"
-          @click="handleOptionClick(key)"
+          :class="getOptionClasses(String(key))"
+          @click="handleOptionClick(String(key))"
         >
           <span class="option-key">{{ key }}.</span>
           <span class="option-text">{{ option }}</span>

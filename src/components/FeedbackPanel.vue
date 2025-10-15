@@ -59,7 +59,7 @@ const correctAnswer = computed(() => {
     return props.question.answer.join('、')
   }
   
-  return props.question.answer
+  return String(props.question.answer)
 })
 
 // 方法
