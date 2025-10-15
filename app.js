@@ -188,6 +188,54 @@ async function check_answer(div) {
         }
     }
 
+    // 显示正确答案
+    let correctAnswerDiv = div.querySelector('#correct-answer');
+    if (!correctAnswerDiv) {
+        correctAnswerDiv = document.createElement('div');
+        correctAnswerDiv.id = 'correct-answer';
+        correctAnswerDiv.className = 'correct-answer-section';
+        // 在选项区域后面插入正确答案区域
+        let selsDiv = div.querySelector('#sels');
+        selsDiv.parentNode.insertBefore(correctAnswerDiv, selsDiv.nextSibling);
+    }
+    
+    // 格式化正确答案显示
+    let correctAnswerText = '';
+    if (quest.type === 'judge') {
+        correctAnswerText = quest.answer ? '正确' : '错误';
+    } else if (quest.type === 'select') {
+        if (Array.isArray(quest.answer)) {
+            // 多选题
+            correctAnswerText = quest.answer.join('、');
+        } else {
+            // 单选题
+            correctAnswerText = quest.answer;
+        }
+    }
+    
+    correctAnswerDiv.innerHTML = `
+        <div class="correct-answer-title">正确答案：</div>
+        <div class="correct-answer-content">${correctAnswerText}</div>
+    `;
+    correctAnswerDiv.style.display = 'block';
+
+    // 显示knowledge字段
+    if (quest.knowledge && typeof quest.knowledge === 'string' && quest.knowledge.trim() !== '') {
+        let knowledgeDiv = div.querySelector('#knowledge');
+        if (!knowledgeDiv) {
+            knowledgeDiv = document.createElement('div');
+            knowledgeDiv.id = 'knowledge';
+            knowledgeDiv.className = 'knowledge-section';
+            // 在正确答案区域后面插入knowledge区域
+            correctAnswerDiv.parentNode.insertBefore(knowledgeDiv, correctAnswerDiv.nextSibling);
+        }
+        knowledgeDiv.innerHTML = `
+            <div class="knowledge-title">知识点：</div>
+            <div class="knowledge-content">${quest.knowledge}</div>
+        `;
+        knowledgeDiv.style.display = 'block';
+    }
+
     let qanswer = quest.answer;
     if (!Array.isArray(qanswer)) {
         qanswer = [qanswer];
@@ -211,6 +259,16 @@ function update_quest(div, { id, quest }) {
     let sels_div = div.querySelector('#sels');
     quest_div.replaceChildren();
     sels_div.replaceChildren();
+    
+    // 隐藏正确答案和knowledge区域
+    let correctAnswerDiv = div.querySelector('#correct-answer');
+    if (correctAnswerDiv) {
+        correctAnswerDiv.style.display = 'none';
+    }
+    let knowledgeDiv = div.querySelector('#knowledge');
+    if (knowledgeDiv) {
+        knowledgeDiv.style.display = 'none';
+    }
 
     div.dataset.current_quest = JSON.stringify(quest);
     let quest_text = id + '. ' + quest.quest;
