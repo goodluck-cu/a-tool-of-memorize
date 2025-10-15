@@ -1,143 +1,86 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-T-O-M</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="description" content="A-T-O-M 在线练习和记忆训练工具">
+  <meta name="keywords" content="练习,记忆,训练,在线学习">
+  <meta name="author" content="A-T-O-M">
+  
+  <!-- PWA 支持 -->
+  <meta name="theme-color" content="#007bff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="A-T-O-M">
+  
+  <!-- 预加载关键资源 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <title>A-T-O-M</title>
+  
+  <!-- 图标 -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  <!-- Manifest -->
+  <link rel="manifest" href="/manifest.json">
 </head>
-<script type="module">
-    import { fetch_quests, install_main } from "./app.js";
-    window.addEventListener('load',
-        async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const practiceParam = urlParams.get('practice');
-            await install_main(document.getElementById("quest_main"), `./${practiceParam}.txt`);
-        });
-</script>
-
-<style>
-    body {
-        margin: 0px;
-        height: 90vh;
-    }
-
-    #quest_main {
-        background-color: aliceblue;
-        padding: 20px;
-        position: relative;
-        width: 100%;
-        box-sizing: border-box;
-        min-height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-
-    ul {
-        padding-inline-start: 0;
-    }
-
-    #quest_main ul li {
-        padding-top: 5px;
-        padding-bottom: 5px;
-        border-width: 1px;
-        border-style: solid;
-        border-color: transparent;
-        font-size: 0.5cm;
-        list-style-type: none;
-    }
-
-    #quest_main ul li.selected {
-        border-color: greenyellow;
-    }
-
-    #quest_main ul li.right {
-        border-color: tomato;
-    }
-
-    #quest_main ul li.right.selected {
-        border-color: greenyellow;
-        background-color: greenyellow;
-    }
-
-    #quest_main ul li.wrong.selected {
-        background-color: tomato;
-    }
-
-    #quest {
-        max-width: 400px;
-        font-size: 0.5cm;
-    }
-
-    #sels {
-        margin-bottom: auto;
-    }
-
-    #submit {
-        display: inline-block;
-    }
-
-    .button {
-        background-color: gainsboro;
-        border-style: solid;
-        display: inline-block;
-        width: 4cm;
-        height: 1.5cm;
-        text-align: center;
-        font-size: 1cm;
-    }
-
-    .touch_area {
-        bottom: 20px;
-    }
-
-    .knowledge-section {
-        margin-top: 20px;
-        padding: 15px;
-        background-color: #f8f9fa;
-        border-left: 4px solid #007bff;
-        border-radius: 4px;
-        display: none;
-    }
-
-    .knowledge-title {
-        font-weight: bold;
-        font-size: 0.6cm;
-        color: #007bff;
-        margin-bottom: 8px;
-    }
-
-    .knowledge-content {
-        font-size: 0.5cm;
-        line-height: 1.4;
-        color: #333;
-    }
-
-    .correct-answer-section {
-        margin-top: 15px;
-        padding: 12px;
-        background-color: #e8f5e8;
-        border-left: 4px solid #28a745;
-        border-radius: 4px;
-        display: none;
-    }
-
-    .correct-answer-title {
-        font-weight: bold;
-        font-size: 0.6cm;
-        color: #28a745;
-        margin-bottom: 6px;
-    }
-
-    .correct-answer-content {
-        font-size: 0.5cm;
-        font-weight: bold;
-        color: #155724;
-    }
-</style>
-
 <body>
-    <div id="quest_main">现在在加载啊，不要急</div>
+  <div id="app">
+    <!-- 初始加载提示 -->
+    <div class="initial-loading">
+      <div class="loading-spinner"></div>
+      <p>正在加载 A-T-O-M...</p>
+    </div>
+  </div>
+  
+  <script type="module" src="/src/main.ts"></script>
+  
+  <style>
+    /* 初始加载样式 */
+    .initial-loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8f9fa;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      z-index: 9999;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #dee2e6;
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .initial-loading p {
+      color: #6c757d;
+      font-size: 16px;
+      margin: 0;
+    }
+    
+    /* 隐藏初始加载 */
+    #app:not(:empty) + .initial-loading {
+      display: none;
+    }
+  </style>
 </body>
-
 </html>

@@ -1,0 +1,235 @@
+/**
+ * 设计系统变量
+ * 移动优先的响应式设计
+ */
+
+:root {
+  // 颜色系统
+  --color-primary: #007bff;
+  --color-primary-rgb: 0, 123, 255;
+  --color-primary-dark: #0056b3;
+  --color-primary-light: #66b3ff;
+  
+  --color-secondary: #6c757d;
+  --color-secondary-rgb: 108, 117, 125;
+  
+  --color-success: #28a745;
+  --color-success-rgb: 40, 167, 69;
+  --color-success-dark: #1e7e34;
+  
+  --color-danger: #dc3545;
+  --color-danger-rgb: 220, 53, 69;
+  --color-danger-dark: #c82333;
+  
+  --color-warning: #ffc107;
+  --color-warning-rgb: 255, 193, 7;
+  
+  --color-info: #17a2b8;
+  --color-info-rgb: 23, 162, 184;
+  
+  // 中性色
+  --color-text: #212529;
+  --color-text-muted: #6c757d;
+  --color-text-light: #adb5bd;
+  
+  --color-bg: #ffffff;
+  --color-bg-muted: #f8f9fa;
+  --color-bg-dark: #e9ecef;
+  
+  --color-border: #dee2e6;
+  --color-border-light: #f1f3f4;
+  
+  // 间距系统 (基于 8px 网格)
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  
+  // 字体系统
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-xxl: 24px;
+  --font-size-xxxl: 32px;
+  
+  // 行高
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.6;
+  
+  // 字重
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  // 触摸目标
+  --touch-target: 44px;
+  --touch-target-lg: 56px;
+  
+  // 圆角
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  // 阴影
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  
+  // 过渡
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+  
+  // Z-index
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+// 暗色主题变量
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #f8f9fa;
+    --color-text-muted: #adb5bd;
+    --color-text-light: #6c757d;
+    
+    --color-bg: #212529;
+    --color-bg-muted: #343a40;
+    --color-bg-dark: #495057;
+    
+    --color-border: #495057;
+    --color-border-light: #6c757d;
+  }
+}
+
+// 断点混入
+@mixin mobile-only {
+  @media (max-width: 575px) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: 768px) {
+    @content;
+  }
+}
+
+@mixin desktop-up {
+  @media (min-width: 992px) {
+    @content;
+  }
+}
+
+@mixin large-desktop-up {
+  @media (min-width: 1200px) {
+    @content;
+  }
+}
+
+// 触摸优化混入
+@mixin touch-optimized {
+  min-height: var(--touch-target);
+  min-width: var(--touch-target);
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: all var(--transition-normal);
+  
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+}
+
+// 响应式字体混入
+@mixin responsive-text($base-size: var(--font-size-base)) {
+  font-size: $base-size;
+  
+  @include mobile-only {
+    font-size: calc(#{$base-size} * 1.125);
+  }
+  
+  @include tablet-up {
+    font-size: calc(#{$base-size} * 1.25);
+  }
+}
+
+// 响应式间距混入
+@mixin responsive-spacing($base-spacing: var(--spacing-md)) {
+  padding: $base-spacing;
+  
+  @include mobile-only {
+    padding: calc(#{$base-spacing} * 1.5);
+  }
+  
+  @include desktop-up {
+    padding: calc(#{$base-spacing} * 2);
+  }
+}
+
+// 容器混入
+@mixin container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+  
+  @include mobile-only {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  @include tablet-up {
+    padding: 0 var(--spacing-lg);
+  }
+}
+
+// 按钮基础样式混入
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-normal);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  @include touch-optimized;
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+// 卡片样式混入
+@mixin card {
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
+  
+  @include mobile-only {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+  }
+}
